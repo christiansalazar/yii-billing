@@ -358,6 +358,93 @@ In this class: YiiBillingOmfStorage we look for an instance of OMF (the method
 abstract public function sto(); ) this method takes body in your class: 
 YourBillingSubClass.  
 
+#Install
+
+Prerequisites: you must first install OMF,  https://github.com/christiansalazar/omf.git
+
+You must clone or download yii-billing by typing:
+
+	 	yourshell# cd /yourapplication/protected/extensions
+	 	yourshell# git clone https://github.com/christiansalazar/omf.git
+	 	yourshell# git clone https://github.com/christiansalazar/yii-billing.git
+
+Now you must check your extensions are created by listing your extensions dir, 
+they must be there.
+
+Now your protected/config/main.php file may include this imports:
+
+	'import'=>array(
+		'application.models.*',
+		'application.components.*',
+		'application.extensions.omf.*',				<-- this
+		'application.extensions.yii-billing.*',		<-- and this
+	),
+	'components'=>array(
+		...bla
+		'omf' => array(
+			'class'=>'application.extensions.omf.OmfDb',
+		),
+	),
+
+Remember to install the OMF mysql script. see details in the OMF readme file.
+
+Create your own subclass, this will be used by you or your callback (see later)
+
+	 yourshell# cd /yourapplication/protected/extensions/yii-billing
+	 yourshell# cp SampleBillingSubClass.php ../../components/MyBilling.php
+	 #remember to edit the class name in the new file.
+
+or create it by hand:
+
+	---begin of file:  /yourapp/protected/components/MyBilling.php---
+	<?php
+	class MyBilling extends YiiBillingPaymentsInAdvance {
+		public function sto(){
+			return Yii::app()->omf;
+		}
+		protected function onPaymentReceived($bill_key, $status, $txn_id, $ready) {
+			//return true to accept remote payment
+			return true;
+		}
+		protected function onNewBillAccount($who, $accountname){ }
+		protected function onBacktoMerchant(){ }
+		protected function onPaymentExpired($bill_key){	}
+		protected function onNewPlanSelected($who, $plan, $billkeys){ }
+		protected function onPlanRequired($who){ }
+		protected function onNextBillSelected($billkey){ }
+		protected function onBillNeedPayment($billkey,$flagFirst){ }
+		protected function onBillUpToDate($billkey,$flagfirst){ }
+		protected function onNoMoreBills($who){ }
+	}
+	?>
+	---end of file:  /yourapp/protected/components/MyBilling.php---
+
+If you want to have a paypal callback action then in any controlller:
+
+		public function actions()
+		{
+			return array(
+				'paypalcallback'=>array(
+					'class'=>
+						'application.extensions.yii-billing.PaypalCallbackAction',
+					'api' =>new MyBilling(),
+					'url' => Yii::app()->params['paypal_url'],
+				),
+				'backtomerchant'=>array(
+					'class'=>
+						'application.extensions.yii-billing.BacktoMerchantAction',
+				),
+			);
+		}
+
+Your callback action will be:
+
+	http://yourapplication/index.php?r=/somecontroller/paypalcallback
+
+Remember to pass the bill_key as the custom argument (paypal case), 
+ yii-billing will require it.
+
+
 #Testing this package
 
 you can test it by creating an action in your application commands having
