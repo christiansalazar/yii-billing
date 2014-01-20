@@ -256,6 +256,16 @@ are very clear to let you know what they are for.
 		$api = new YourBillingSubClass; 
 		$api->newIdentity("some_guy_id");
 
+	or you can test for a preexisting BillAccount, it helps in avoiding a machine reset:
+	
+		$api = new YourBillingSubClass; 
+		if($api->requireNewIdentity("some_guy_id"))
+			$api->newIdentity("some_guy_id");
+	
+	that last case is usefull when you are implementing yii-billing in a system
+	which user accounts are already created, so only init a new BillAccount 
+	for each one if previously was not created.
+
 2. at any moment you can make a call to any of this methods:
 
 		* checkAccountStatus (returns integer reflecting status)
