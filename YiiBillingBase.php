@@ -75,28 +75,9 @@ abstract class YiiBillingBase {
 	abstract public function listBillQuotes($who);
 	abstract public function makePayment($who, $txn_id, $bill_key=null);
 	abstract public function checkAccountStatus($who,$dt=null);
-	/*
 	abstract public function isAccountUpToDate($who,$dt=null);
 	abstract public function isAccountNeedPayment($who,$dt=null);
 	abstract public function isAccountPlanRequired($who,$dt=null);
-	*/
-
-	// default implementation for high level public api methods
-	public function isAccountUpToDate($who,$dt=null){
-		$this->checkAccountStatus($who, $dt);
-		return "up-to-date" === 
-		$this->getBillAccountStatus($who, self::$account);
-	}
-	public function isAccountNeedPayment($who,$dt=null){
-		$this->checkAccountStatus($who, $dt);	
-		return "need-payment" === 
-		$this->getBillAccountStatus($who, self::$account);
-	}
-	public function isAccountPlanRequired($who,$dt=null){
-		$this->checkAccountStatus($who, $dt);	
-		return "plan-required" === 
-		$this->getBillAccountStatus($who, self::$account);
-	}
 	// high level base api
 	public function createBillAccount($who, $accountname) {
 		$id = $this->_createBillAccount($who, $accountname);

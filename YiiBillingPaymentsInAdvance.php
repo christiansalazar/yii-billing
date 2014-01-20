@@ -159,6 +159,21 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 		$this->setBillPaid($bill_key,$txn_id);
 		$this->onPaymentReceived($bill_key, "accepted", $txn_id, false);
 	}
+	public function isAccountUpToDate($who,$dt=null){
+		$this->checkAccountStatus($who, $dt);
+		return "up-to-date" === 
+		$this->getBillAccountStatus($who, self::$account);
+	}
+	public function isAccountNeedPayment($who,$dt=null){
+		$this->checkAccountStatus($who, $dt);	
+		return "need-payment" === 
+		$this->getBillAccountStatus($who, self::$account);
+	}
+	public function isAccountPlanRequired($who,$dt=null){
+		$this->checkAccountStatus($who, $dt);	
+		return "plan-required" === 
+		$this->getBillAccountStatus($who, self::$account);
+	}
 	/**
 	 * checkAccountStatus 
 	 * 
