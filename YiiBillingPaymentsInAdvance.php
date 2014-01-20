@@ -76,6 +76,17 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 		return $id;
 	}
 	/**
+	 * requireNewIdentity 
+	 * 	detects is the given identity must call newIdentity. needed when
+	 *	a given identity was never initialized and then has no BillAccount.
+	 * @param mixed $who 
+	 * @access public
+	 * @return bool true if newIdentity must be called
+	 */
+	public function requireNewIdentity($who){
+		return (null == $this->getBillAccount($who,self::$account));
+	}
+	/**
 	 * canSelectPlan 
 	 *	returns true if the identity account is marked to receive a new plan.
 	 *	when account is created for a given identity then it is marked as 'true'

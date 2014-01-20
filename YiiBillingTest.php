@@ -278,6 +278,7 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 	}
 	// public high level api not tested here
 	public function newIdentity($who){}
+	public function requireNewIdentity($who){ return true; }
 	public function canSelectPlan($who){}
 	public function selectPlan($who, $plan, $dt=null){}
 	public function listBillQuotes($who){}

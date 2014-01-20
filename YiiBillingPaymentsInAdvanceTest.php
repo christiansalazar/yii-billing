@@ -27,10 +27,12 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 	public function testNewIdentity($who){
 		printf("[%s][who=%s]",__METHOD__,$who);
 
+		if(false === $this->requireNewIdentity($who)) throw new Exception("error");
 		$id = $this->newIdentity($who);
 		if(empty($id)) throw new Exception("error");
 		$id2 = $this->billaccount($who);
 		if($id != $id2) throw new Exception("error");
+		if(true === $this->requireNewIdentity($who)) throw new Exception("error");
 
 		if("noplan" != $this->getCurrentPlan($who)) throw new Exception("error");
 		$this->setCurrentPlan($who, "testplan");

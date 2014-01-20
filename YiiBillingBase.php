@@ -69,6 +69,7 @@ abstract class YiiBillingBase {
 	abstract protected function onNoMoreBills($who);
 	// high level public api
 	abstract public function newIdentity($who);
+	abstract public function requireNewIdentity($who);
 	abstract public function canSelectPlan($who);
 	abstract public function selectPlan($who, $plan, $dt=null);
 	abstract public function listBillQuotes($who);
