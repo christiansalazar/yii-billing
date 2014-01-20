@@ -457,4 +457,4 @@ this body:
 		$test2->run();
 	}
 
-[1]:https://github.com/christiansalazar/yii-billing/blob/master/yiibilling-classdiagram-1.jpg?raw=true
+[1]:https://github.com/christiansalazar/yii-billing/blob/master/yiibilling-classdiagram-2.png?raw=true
