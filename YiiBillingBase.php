@@ -225,4 +225,12 @@ abstract class YiiBillingBase {
 		}
 		return null;
 	}
+	public function calculatePages($total_items, $items_per_page){
+		$pages = (int)($total_items / $items_per_page);
+		$pages += (((int)($pages * $items_per_page)) !== $total_items);
+		return $pages;
+	}
+	public function calculatePageOffset($items_per_page, $page){
+		return $items_per_page * $page;
+	}
 }

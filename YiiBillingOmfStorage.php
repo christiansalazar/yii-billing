@@ -96,6 +96,55 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 		$this->sto()->set($this->getBillAccount($who, $accountname), 
 			'account_status', $status);
 	}
+	/**
+	 * listBillAccountsByStatus
+	 *	return BillAccount object array having the selected account status,
+	 *	allowing pagination options. 
+	 *
+	 *	the returned array is composed in this way:
+	 *
+	 *		array(
+	 			array($id, $who, $accountname, $accountstatus,$curr_billkey), 
+				... ,
+			)
+	 *
+	 *	so you can use it in this way:
+	 *
+	 *		
+	 		foreach($this->listBillAccountsByStatus(...) as $ac){
+				list($id, $who, $accountname, $accountstatus,$bk) = $ac;
+				
+	 		}
+	 *
+	 * 
+	 * @param string $status 'plan-required','need-payment','up-to-date'
+	 * @param integer $offset 
+	 * @param integer $limit 
+	 * @param bool $counter_only 
+	 * @access public
+	 * @return array array see note about returned array 
+	 */
+	public function listBillAccountsByStatus($status,$offset=0,$limit=-1,
+	  $counter_only=false){
+		if($counter_only == true){
+			return $this->sto()->find($this->BillAccountClassName(),
+				'account_status',$status,$offset,$limit,true);
+		}else{
+		$objects = array();
+		foreach($this->sto()->find($this->BillAccountClassName(),
+			'account_status',$status,$offset,$limit,false) as $obj){
+			list($id) = $obj;
+			$objects[] = array(
+				$id,
+				$this->sto()->get($id,'who'),
+				$this->sto()->get($id,'account_name'),
+				$this->sto()->get($id,'account_status'),
+				$this->sto()->get($id,'current_bill'),
+			);
+		}
+		return $objects;
+		}
+	}
 	protected function createNewBillKey(
 		$who, $accountname, $item, $amount, $from_date, $to_date){
 			list($bill_id) = $this->sto()->create('Bill','','',

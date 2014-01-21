@@ -29,6 +29,8 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		$this->clearAll();
 		$this->callbacktest();
 		$this->clearAll();
+		$this->supervisionTester();
+		$this->clearAll();
 	}
 	private function clearAll(){
 		$this->sto()->deleteObjects($this->BillAccountClassName());
@@ -235,6 +237,48 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 
 		print("OK\n");
 		*/
+	}
+	public function supervisionTester(){
+		$this->log(__METHOD__,"running...");
+
+        $an = "test";
+		$accounts = array();
+		$billkeys = array();
+
+		$status = array();
+		$status['status1'] = 0;
+		$status['status2'] = 0;
+		$status['status3'] = 0;
+
+		// creates a random database
+		for($i=0;$i<10;$i++){
+			$who = sprintf("who_%s",$i);
+			$id = $this->createBillAccount($who, $an);
+			$accounts[] = $id;
+			if($id == null) throw new Exception("error");
+			for($j=0;$j<3;$j++){
+				$bk = $this->createNewBillKey(
+					$who, $an, 'item-'.$j,999, '2014-01-01', '2014-01-31');
+				if(empty($bk)) throw new Exception("error");
+				$billkeys[] = $bk;
+			}
+			// change status
+			$index = rand(1,3);
+			$st = "status".$index;
+			$status[$st]++;
+			$this->setBillAccountStatus($who, $an, $st);
+		}
+		// query the database, must match the expected results
+		foreach($status as $st=>$counter){
+			$has = count($this->listBillAccountsByStatus($st));
+			if($counter != $has){ 
+				throw new Exception("error. billAccount having status "
+					.$st." must have: ".$counter." items, has: ".$has);
+			}
+			//else printf("[%s,%s,%s]",$st,$counter,$has);
+		}
+		// test pagination: NO, we lay on OMF is well tested against pagination
+		print("OK\n");
 	}
 	// EVENTS:
 	protected function onNewBillAccount($who, $accountname){

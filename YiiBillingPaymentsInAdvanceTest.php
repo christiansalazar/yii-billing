@@ -382,7 +382,15 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 		
 		if(-1 != $this->checkAccountStatus($who,$dt))
 			throw new Exception("error");
-				
+
+		$tt['step13'] = microtime(true);
+		if(0 !== $this->listBillAccountsByStatus(null,0,-1,true)) throw new Exception("error");
+		if(null === $this->listBillAccountsByStatus(null,0,-1,false)) throw new Exception("error");
+		if(0 !== $this->listBillAccountsByStatus("null",0,-1,true)) throw new Exception("error");
+		if(null === $this->listBillAccountsByStatus("null",0,-1,false)) throw new Exception("error");
+
+		foreach($this->listBillAccountsByStatus(null,0,-1,false) as $dummy) { }
+
 		$this->printprofile($tt);
 			
 		printf("OK\n");

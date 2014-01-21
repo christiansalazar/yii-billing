@@ -359,6 +359,29 @@ checkAccountStatus.
 	* it will check expiration and move the status when required.
 	* machine will change to 'plan-required' when all bills expires.
 
+6. listings and supervision:
+
+		// list *all* BillAccount objects having status 'need-payment'
+		// you can select any status. see method doc.
+		$objects = $api->listBillAccountsByStatus('need-payment');
+
+		// YiiBilling lets you paginate large results:
+		//	this call will count how many objects we have in the given status
+		$items = $api->listBillAccountsByStatus('need-payment',0,0,true);
+
+		// so we know how many items we have in total, now proceed to paginate
+		$pages = $api->calculatePages($items, $items_per_page);
+		$page_number = 7; // ofcourse suppose $pages is bigger than 7...
+		$offset = $api->calculatePageOffset($items_per_page,$page_number);
+		
+		foreach($api->listBillAccountsByStatus(
+			'need-payment',$offset,$items_per_page) as $id){
+			list($id, $who, $accountname, $accountstatus,$bk) = $ac;
+			// tip: using the who and accountname you can query the api 
+			
+		}
+
+
 #Persistence, where does this package store my objects ?
 
 The answer is OMF. https://github.com/christiansalazar/omf.git
@@ -376,7 +399,7 @@ YourBillingSubClass.
 
 #Install
 
-Prerequisites: you must first install OMF,  https://github.com/christiansalazar/omf.git
+Prerequisites: you must first install OMF,  https://github.com/christiansalazar/omf.git from commit (required): 4ee1e20cf2
 
 You must clone or download yii-billing by typing:
 
