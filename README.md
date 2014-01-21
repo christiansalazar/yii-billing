@@ -322,7 +322,13 @@ it moves the machine status from 'need-payment' to 'up-to-date'
 		$api = new YourBillingSubClass; 
 		$who = "some_guy_id";
 		$txn_id = "19289189812";
+		$bill_key = $api->getActiveBillKey($who);
 		$api->makePayment($who, $txn_id, $bill_key);
+
+		you can have more bill information by calling:
+
+		list($who, $item, $amount, $from, $to, $txn_id, $id) 
+			= $api->getBillInfo($bill_key);
 
 	Remote payments: A remote payment arrives to you via callback. 
 	(see PaypalCallbackAction as an implementation of an IPN paypal handler). When 

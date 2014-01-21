@@ -73,6 +73,8 @@ abstract class YiiBillingBase {
 	abstract public function canSelectPlan($who);
 	abstract public function selectPlan($who, $plan, $dt=null);
 	abstract public function listBillQuotes($who);
+	abstract public function getActiveBillKey($who);
+	abstract public function getBillInfo($billkey);
 	abstract public function makePayment($who, $txn_id, $bill_key=null);
 	abstract public function checkAccountStatus($who,$dt=null);
 	abstract public function isAccountUpToDate($who,$dt=null);

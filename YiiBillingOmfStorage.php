@@ -112,6 +112,19 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 			$this->sto()->set($bill_id, $properties);
 		return $bill_key;
 	}
+	/**
+	 * findBill
+	 *	returns bill information
+	 * 
+	 *	the returned array can be readed as follow:
+	 *	
+	 *	list($who, $item, $amount, $from, $to, $txn_id, $id) 
+	 *		= $some->findBill("somebillkey");
+	 * 
+	 * @param string $bill_key 
+	 * @access protected
+	 * @return array see note
+	 */
 	protected function findBill($bill_key){
 		if(null == ($bill_list = $this->sto()->find('Bill','key',$bill_key)))
 			return null;

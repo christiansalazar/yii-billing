@@ -174,6 +174,12 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 		return "plan-required" === 
 		$this->getBillAccountStatus($who, self::$account);
 	}
+	public function getActiveBillKey($who){
+		return $this->getCurrentBillKey($who, self::$account);
+	}
+	public function getBillInfo($billkey){
+		return $this->findBill($billkey);
+	}
 	/**
 	 * checkAccountStatus 
 	 * 

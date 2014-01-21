@@ -282,6 +282,8 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 	public function canSelectPlan($who){}
 	public function selectPlan($who, $plan, $dt=null){}
 	public function listBillQuotes($who){}
+	public function getActiveBillKey($who){}
+	public function getBillInfo($billkey){}
 	public function makePayment($who, $txn_id, $bill_key=null){}
 	public function checkAccountStatus($who,$dt=null){}
 	public function isAccountUpToDate($who,$dt=null){}
