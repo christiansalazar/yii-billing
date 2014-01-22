@@ -129,6 +129,7 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 			$who, $yearly, $monthly, $discount,
 			$fullyear ? '1year' : '3months', $name, $dt);
 		$this->setRenewPlanFlag($who, false);
+		$this->setCurrentPlan($who, $name);
 		$this->setCurrentBillKey($who, self::$account,$billkeys[0]);
 		$this->setBillAccountStatus($who, self::$account, 'need-payment');
 		$this->onNewPlanSelected($who, $plan, $billkeys);

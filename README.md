@@ -316,6 +316,14 @@ are very clear to let you know what they are for.
 			list($id,$billkey,$item,$amount,$from,$to,$txn_id) = $q;
 		} 
 
+	to know what the current plan is using:
+
+		$plan_name = $api->getCurrentPlan($who);
+
+		please note getCurrentPlan depends on the Payment model in this
+		case that offered by default by: YiiBillingPaymentInAdvance
+		
+
 4. call makePayment to obviously: pay a bill, given its billkey number.
 it moves the machine status from 'need-payment' to 'up-to-date' 
  

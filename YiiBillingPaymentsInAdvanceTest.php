@@ -177,6 +177,8 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 		if(false == $this->selectPlan($who,
 			array("testplan", 100, 10, 0, false),$dt))
 				throw new Exception("error");
+		if("testplan" !== $this->getCurrentPlan($who))
+			throw new Exception("error");
 		$tt['step2aa'] = microtime(true);
 		if("need-payment" != $this->billAccountStatus($who))
 			throw new Exception("error");
