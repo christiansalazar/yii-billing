@@ -389,6 +389,16 @@ checkAccountStatus.
 			
 		}
 
+7. reset the plan and select a new one. This action will move the machine 
+status back to 'plan-required', deleting the not paid Bills too.
+
+	if(false === $api->canSelectPlan($who)){
+		$api->resetPlan($who);
+		if($api->canSelectPlan($who)){
+			$api->selectPlan($who, $new_plan);
+		}else
+		throw new Exception("so very rare error, must never happens");
+	}
 
 #Persistence, where does this package store my objects ?
 

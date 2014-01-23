@@ -56,6 +56,7 @@ abstract class YiiBillingBase {
 	abstract protected function getBillPaid($bill_key);
 	abstract protected function setCurrentBillKey($who, $accountname, $bill_key);
 	abstract protected function getCurrentBillKey($who, $accountname);
+	abstract public function resetAccount($who,$accountname);
 	// events
 	abstract protected function onNewBillAccount($who, $accountname);
 	abstract protected function onBacktoMerchant();
@@ -69,6 +70,7 @@ abstract class YiiBillingBase {
 	abstract protected function onNoMoreBills($who);
 	// high level public api
 	abstract public function newIdentity($who);
+	abstract public function resetPlan($who);
 	abstract public function requireNewIdentity($who);
 	abstract public function canSelectPlan($who);
 	abstract public function selectPlan($who, $plan, $dt=null);

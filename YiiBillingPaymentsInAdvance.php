@@ -69,11 +69,11 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 // PUBLIC METHODS
 	public function newIdentity($who){
 		$id = $this->createBillAccount($who,self::$account);
-		$this->setBillAccountStatus($who,self::$account,"plan-required");
-		$this->setCurrentBillKey($who, self::$account, "");
-		$this->setCurrentPlan($who, "noplan");
-		$this->setRenewPlanFlag($who, true);
+		$this->resetAccount($who,self::$account);
 		return $id;
+	}
+	public function resetPlan($who){
+		$this->resetAccount($who,self::$account);
 	}
 	/**
 	 * requireNewIdentity 

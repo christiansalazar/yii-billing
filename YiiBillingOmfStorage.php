@@ -69,6 +69,28 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 	}
 
 	/**
+	 * resetAccount
+	 *	put the machine status back to 'plan-required' deleting all unpaid bills
+	 * 
+	 * @param mixed $who 
+	 * @param mixed $accountname 
+	 * @access public
+	 * @return void
+	 */
+	public function resetAccount($who,$accountname){
+		$id = $this->getBillAccount($who, $accountname);
+		$this->sto()->set($id, "renew_plan", 'TRUE'); // 'TRUE', not: true
+		$this->sto()->set($id, "account_status", "plan-required");
+		$this->sto()->set($id, "plan", "noplan");
+		$this->sto()->set($id, "current_bill", "");
+		foreach($this->listBillKeys($who,$accountname) as $quote){
+	 		list($bill_id,$key,$item,$amount,$from,$to,$txn_id) = $quote;
+			if(empty($txn_id))
+				$this->sto()->deleteObject($bill_id);
+		}
+	}
+
+	/**
 	 * getBillAccount
 	 *	returns the ID of the account having the required accountname
 	 *

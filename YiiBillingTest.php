@@ -195,7 +195,6 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		if($bk3 != $this->getNextBillKey($who,$an, $bk2)) throw new Exception("error");
 		if($bk4 != $this->getNextBillKey($who,$an, $bk3)) throw new Exception("error");
 		if(null != $this->getNextBillKey($who,$an, $bk4)) throw new Exception("error");
-
 		print("OK\n");
 	}
 	private function simplepayment() {
@@ -250,9 +249,12 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		$status['status2'] = 0;
 		$status['status3'] = 0;
 
+		$_who = null;
+
 		// creates a random database
 		for($i=0;$i<10;$i++){
 			$who = sprintf("who_%s",$i);
+			$_who = $who;
 			$id = $this->createBillAccount($who, $an);
 			$accounts[] = $id;
 			if($id == null) throw new Exception("error");
@@ -278,6 +280,22 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 			//else printf("[%s,%s,%s]",$st,$counter,$has);
 		}
 		// test pagination: NO, we lay on OMF is well tested against pagination
+
+		// test resetPlan
+		foreach($this->listBillKeys($_who, $an) as $index=>$quote){
+	 		list($id,$key,$item,$amount,$from,$to,$txn_id) = $quote;
+			if($index > 0){
+				// pay all bills except the first one
+				$this->setBillPaid($key,"sometx");
+			}
+		}
+		$this->resetAccount($_who,$an);
+		foreach($this->listBillKeys($_who,$an) as $index=>$quote){
+	 		list($id,$key,$item,$amount,$from,$to,$txn_id) = $quote;
+			//after reset no quotes may be in no-paid status
+			if(empty($txn_id)) throw new Exception("error");
+		}
+		
 		print("OK\n");
 	}
 	// EVENTS:
@@ -322,6 +340,7 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 	}
 	// public high level api not tested here
 	public function newIdentity($who){}
+	public function resetPlan($who){}
 	public function requireNewIdentity($who){ return true; }
 	public function canSelectPlan($who){}
 	public function selectPlan($who, $plan, $dt=null){}
