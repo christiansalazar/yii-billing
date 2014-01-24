@@ -15,6 +15,7 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 		$this->testLowLevelQuoteSplitter();
 		$this->testHighLevelQuoteSplitter($who);
 		$this->testHighLevelAccountTester($who);
+		$this->testIssueNumber4($who);
 		$this->clear();
 	}
 	protected function clear(){
@@ -398,7 +399,61 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 		printf("OK\n");
 	}
 
+	public function testIssueNumber4($who){
+		printf("[%s]",__METHOD__);
+		$this->clear();
+		
+		$dt = '2014-01-01';
+
+		$this->testNewIdentity($who);
+		if("plan-required" != $this->billAccountStatus($who))
+			throw new Exception("error");
+		if(true != $this->canSelectPlan($who)) 
+			throw new Exception("error");
+		if(count($this->listBillQuotes($who)))
+			throw new Exception("error");
+
+		if(-1 !== $this->checkAccountStatus($who,$dt))
+			throw new Exception("error");
+
+		if(false == $this->selectPlan($who,
+			array("testplan", 100, 10, 0, false),$dt))
+				throw new Exception("error");
+		if("testplan" !== $this->getCurrentPlan($who))
+			throw new Exception("error");
+		if("need-payment" != $this->billAccountStatus($who))
+			throw new Exception("error");
+		if(false != $this->canSelectPlan($who)) 
+			throw new Exception("error");
+		$quotes = $this->listBillQuotes($who);
+		if(!count($quotes))
+			throw new Exception("error");
+
+		if(2 !== $this->checkAccountStatus($who,$dt))
+			throw new Exception("error");
+		if("need-payment" != $this->billAccountStatus($who))
+			throw new Exception("error");
+
+		// now proceeding to make the issue 4 to appear:
+		//
+		// put the first quote to start 1 day after of the full range
+		// this action will put the account outside the range of any quotes
+		$dt2 = '2014-01-02';
+		foreach($quotes as $index=>$quote){
+			list($obj_id,$key,$item,$amount,$from,$to,$txn_id) = $quote;
+			if($index == 0){
+				$this->sto()->set($obj_id,'from',$dt2);
+			}
+		}
+
+		if(2 !== $this->checkAccountStatus($who,$dt))
+			throw new Exception("error"); // error detected
+
+		printf("OK\n");
+	}
+
 	private function printprofile($tt){
+		return;
 		$tt['final'] = microtime(true);
 		printf("\nmicrotimes:\n");
 		$_last = $tt['begin'];
@@ -441,6 +496,6 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 				
 	}
 	protected function onNoMoreBills($who){
-
+		
 	}
 }
