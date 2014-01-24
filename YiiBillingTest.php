@@ -174,8 +174,8 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		if($bk !== $this->getCurrentBillKey($who, $an))
 			throw new Exception("error");
 
-		if(true !== $this->isBillExpired($bk, $test0))
-			throw new Exception("error");
+		if(1 !== $this->isBillExpired($bk, $test0))
+			throw new Exception("error");//0 means: out of range but before
 		if(false !== $this->isBillExpired($bk, $test1))
 			throw new Exception("error");
 		if(true !== $this->isBillExpired($bk, $test2))

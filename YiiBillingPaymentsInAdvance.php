@@ -190,6 +190,7 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 	 *		-2:	no bill account set (error)
 	 *		-3:	no more bills. status changed to 'plan-required'
 	 *		-4:	no bill account
+	 *		-5:	too early (see issue #4 for details)
 	 *		 0: bill unpaid, out of range.
 	 *		+2:	bill unpaid, but in range of 30 days
 	 *		+1:	bill up to date
@@ -212,7 +213,9 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 			$this->setBillAccountStatus($who, self::$account, 'need-payment');
 			return -2; // no bill account set. rare. maybe an error.
 		}
-		if($this->isBillExpired($billkey, $dt)){
+		$code = $this->isBillExpired($billkey, $dt);
+		if($code === true){
+			// true means: after range
 			$this->onPaymentExpired($billkey);
 			if($billkey = $this->getNextBillKey($who, self::$account, $billkey)){
 				$this->setCurrentBillKey($who, self::$account,$billkey);
@@ -226,6 +229,10 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 				$this->onNoMoreBills($who);
 				return -3; // no more bill. system reset.
 			}
+		}elseif($code === 1){
+			// the date is out of range BUT previous to the range 
+			// of the current bill key, this case is for fixing ISSUE #4
+			return -5; // too early to use the system
 		}else{
 			if("" == $this->getBillPaid($billkey)){
 				if("need-payment" != 

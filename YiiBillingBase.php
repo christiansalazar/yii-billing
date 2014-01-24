@@ -113,20 +113,31 @@ abstract class YiiBillingBase {
 	}
 	/**
 	 * isBillExpired
-	 *	checks if the passed datex is between the bill range date.
+	 *	checks if the passed datex is in the bill range date and not before it.
 	 * 
 	 *	datex accepted values: 'yyyy/mm/dd' or integer (time())
 	 *
 	 * @param string $bill_key 
 	 * @param mixed $datex a string date yyyy/mm/dd or an integer value
 	 * @access public
-	 * @return bool true if (from <= datex < to)
+	 * @return mixed ===true if expired (after of range). ===1 previous to range. ===false in range
 	 */
 	public function isBillExpired($bill_key, $datex = null){
 		$data = $this->findBill($bill_key);
 		if(empty($data)) return true;
 		list($who, $item, $amount, $from, $to) = $data;
-		return !$this->dateInRange($datex, $from, $to);
+		$t1 = strtotime($from." 00:00:00");
+		$t2 = strtotime($to." 00:00:00");
+		if($datex == null){
+			$tx = time();
+		}else{
+			if(is_string($datex)){
+				$tx = strtotime($datex)." 00:00:00";
+			}else
+			$tx = $datex;
+		}
+		if($tx < $t1) { return 1; }
+		elseif($tx >= $t2){ return true; }else return false;
 	}
 	protected function dateInRange($datex, $from, $to){
 		$t1 = strtotime($from." 00:00:00");

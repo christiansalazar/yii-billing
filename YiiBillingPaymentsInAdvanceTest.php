@@ -434,6 +434,20 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 		if("need-payment" != $this->billAccountStatus($who))
 			throw new Exception("error");
 
+		$index=0;
+		$first_billkey=null;
+		$next_billkey=null;
+		foreach($quotes as $index=>$quote){
+			list($obj_id,$key,$item,$amount,$from,$to,$txn_id) = $quote;
+			if($index === 0){
+				$first_billkey = $key;
+			}else
+			if($index === 1)
+				$next_billkey = $key;
+		}
+		$current_bk = $this->getCurrentBillKey($who,self::$account);
+		if($first_billkey != $current_bk)
+			throw new Exception("error");
 		// now proceeding to make the issue 4 to appear:
 		//
 		// put the first quote to start 1 day after of the full range
@@ -446,8 +460,16 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 			}
 		}
 
-		if(2 !== $this->checkAccountStatus($who,$dt))
+		if($next_billkey !== $this->getNextBillKey($who, self::$account, $current_bk))
+			throw new Exception("error getNextBillKey");
+
+		if(-5 !== $this->checkAccountStatus($who,$dt))
 			throw new Exception("error"); // error detected
+
+		if("need-payment" != $this->billAccountStatus($who))
+			throw new Exception("error");                   		
+		if("testplan" !== $this->getCurrentPlan($who))
+			throw new Exception("error");
 
 		printf("OK\n");
 	}

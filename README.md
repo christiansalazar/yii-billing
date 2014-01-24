@@ -227,6 +227,7 @@ The return value of checkAccountStatus is one of:
 	* -2	bill not found. (very rare, may never occur)
 	* -3	no more bill (all are expired)
 	* -4	no billAccount created (you may forget to call newIdentity )
+	* -5	too early. occurs when the date is prior to the current bill key
 	*  0	bill need payment and out of 30 days range limit
 	*  2	bill need payment but in range of 30 days limit
 	*  1	bill is paid and up to date
