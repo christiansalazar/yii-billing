@@ -94,7 +94,7 @@ class PaypalCallbackAction extends CAction {
 		Yii::log(__METHOD__." Callback Invoked. POST:\n[BEGIN POST]\n"
 				.json_encode($_POST)."\n[END POST]\n","paypal");
 		$bill_key = $this->getPost('custom');
-		$data = $this->api->findBill($bill_key);
+		$data = $this->api->getBillInfo($bill_key);
 		if(empty($data)){
 			Yii::log(__METHOD__.". invalid bill key. ".$bill_key,"paypal");
 		}elseif($this->validateIPN($this->url)){
