@@ -80,17 +80,33 @@ class PaypalCallbackAction extends CAction {
 		return null;
 	}
 
+	/**
+	 * run 
+	 *
+	 *	sample URL to invoke this callback from paypal:
+	 *
+	 *	http://coquito/wh/index.php?r=/pwacore/billing/paypalcallback&custom=123456
+	 *	
+	 * @access public
+	 * @return void
+	 */
 	public function run(){
+		Yii::log(__METHOD__." Callback Invoked. POST:\n[BEGIN POST]\n"
+				.json_encode($_POST)."\n[END POST]\n","paypal");
 		$bill_key = $this->getPost('custom');
 		$data = $this->api->findBill($bill_key);
 		if(empty($data)){
-			Yii::log(__METHOD__.". invalid bill key. ".$bill_key,"info");
+			Yii::log(__METHOD__.". invalid bill key. ".$bill_key,"paypal");
 		}elseif($this->validateIPN($this->url)){
 			$payment_status = $this->getPost('payment_status');
 			if($payment_status == 'Completed'){
+				Yii::log(__METHOD__.".OK.call receivePayment.","paypal");
 				$this->api->receivePayment(
 					$bill_key,'accepted',$this->getPost('txn_id'));
 			}
+		}else{
+			Yii::log(__METHOD__." IPN not validated. bill_key="
+				.$bill_key,"paypal");
 		}
 	}
 
