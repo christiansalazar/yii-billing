@@ -14,7 +14,7 @@
 					'class'=>
 						'application.extensions.yii-billing.PaypalCallbackAction',
 					'api' =>new MyBilling(),
-					'url' => Yii::app()->params['paypal_url'],
+					'use_sandbox' => Yii::app()->params['paypal_use_sandbox'],
 				),
 				'backtomerchant'=>array(
 					'class'=>
@@ -72,7 +72,7 @@
  */
 class PaypalCallbackAction extends CAction {
 	public $api;
-	public $url;
+	public $use_sandbox;  // boolean
 
 	public function getPost($name){
 		if(isset($_POST[$name]))
@@ -97,7 +97,7 @@ class PaypalCallbackAction extends CAction {
 		$data = $this->api->getBillInfo($bill_key);
 		if(empty($data)){
 			Yii::log(__METHOD__.". invalid bill key. ".$bill_key,"paypal");
-		}elseif($this->validateIPN($this->url)){
+		}elseif($this->validateIPN($this->use_sandbox)){
 			$payment_status = $this->getPost('payment_status');
 			if($payment_status == 'Completed'){
 				Yii::log(__METHOD__.".OK.call receivePayment.","paypal");
@@ -110,39 +110,63 @@ class PaypalCallbackAction extends CAction {
 		}
 	}
 
-	private function validateIPN($url){
-        error_reporting(E_ALL ^ E_NOTICE);
-		$p_reception = '';
-
-        $req = 'cmd=_notify-validate';
-        foreach ($_POST as $key => $value) {
-			if(function_exists('get_magic_quotes_gpc') 
-				&& (get_magic_quotes_gpc()==1)) {
-					$value = urlencode(stripslashes($value));
-                }else{
-					$value = urlencode($value);
-				}
+	private function validateIPN($use_sandbox){
+		$paypal_url = "https://www.paypal.com/cgi-bin/webscr";
+		if($use_sandbox == true) 
+		   $paypal_url = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+		$raw_post_data = file_get_contents('php://input');
+		$raw_post_array = explode('&', $raw_post_data);
+		$myPost = array();
+		foreach ($raw_post_array as $keyval) {
+			$keyval = explode ('=', $keyval);
+			if (count($keyval) == 2)
+				$myPost[$keyval[0]] = urldecode($keyval[1]);
+		}
+		$req = 'cmd=_notify-validate';
+		if(function_exists('get_magic_quotes_gpc')) {
+			$get_magic_quotes_exists = true;
+		}
+		foreach ($myPost as $key => $value) {
+			if($get_magic_quotes_exists == true && get_magic_quotes_gpc() == 1) {
+				$value = urlencode(stripslashes($value));
+			} else {
+				$value = urlencode($value);
+			}
 			$req .= "&$key=$value";
-        }
-        
-		$header .= "POST /cgi-bin/webscr HTTP/1.0\r\n";
-        $header .= "Content-Type: application/x-www-form-urlencoded\r\n";
-        $header .= "Content-Length: " . strlen($req) . "\r\n\r\n";
+		}
+		$ch = curl_init($paypal_url);
+		if ($ch == FALSE) return FALSE;
+		curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $req);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+		curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Connection: Close'));
+		$res = curl_exec($ch);
+		if (curl_errno($ch) != 0) {
+			$errstr = curl_error($ch);
+			Yii::log(__METHOD__." curl error: ".$errstr,"paypal");
+			curl_close($ch);
+			exit;
 
-        $fp = @fsockopen ($url, 443, $errno, $errstr, 30);
-        if (!$fp) {
-			$p_reception = "HTTP-ERROR";
-        } else {
-			fputs ($fp, $header . $req);
-			while (!feof($fp)){
-				$res = fgets ($fp, 1024);
-				if (strcmp ($res, "VERIFIED") == 0){
-					$p_reception = "VERIFIED";
-				}else if (strcmp ($res, "INVALID") == 0) {
-					$p_reception = "INVALID";
-			}}
-        	fclose ($fp);
-        }
-        return ($p_reception == "VERIFIED");
+		} else {
+			curl_getinfo($ch, CURLINFO_HEADER_OUT);
+			curl_close($ch);
+		}
+		Yii::log(__METHOD__." response=".$res,"paypal");
+		if (strcmp ($res, "VERIFIED") == 0) {
+			// check whether the payment_status is Completed
+			$payment_status = $_POST['payment_status'];
+			if($payment_status == 'Completed'){
+				return true;
+			}else{
+				return false;
+			}
+		}else{
+			return false;
+		}
 	}
 }

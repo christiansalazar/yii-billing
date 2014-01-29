@@ -352,7 +352,7 @@ it moves the machine status from 'need-payment' to 'up-to-date'
 					'class'=>
 						'application.extensions.yii-billing.PaypalCallbackAction',
 					'api' =>new YourBillingSubClass(),
-					'url' => Yii::app()->params['paypal_url'],
+					'use_sandbox' => Yii::app()->params['paypal_bool_use_sandbox'],
 				),
 				'backtomerchant'=>array(
 					'class'=>
@@ -486,7 +486,7 @@ If you want to have a paypal callback action then in any controlller:
 					'class'=>
 						'application.extensions.yii-billing.PaypalCallbackAction',
 					'api' =>new MyBilling(),
-					'url' => Yii::app()->params['paypal_url'],
+					'use_sandbox' => Yii::app()->params['paypal_bool_use_sandbox'],
 				),
 				'backtomerchant'=>array(
 					'class'=>
