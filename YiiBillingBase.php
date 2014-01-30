@@ -112,6 +112,7 @@ abstract class YiiBillingBase {
 			}else{
 				$this->setBillAccountStatus(
 					$who, $accountname, 'need-payment');
+				$this->onPaymentReceived($bill_key, $status, $txn_id, false);
 			}
 		}else{
 			Yii::log(__METHOD__." onPaymentReceived returns false. "

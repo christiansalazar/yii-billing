@@ -103,6 +103,12 @@ class PaypalCallbackAction extends CAction {
 				Yii::log(__METHOD__.".OK.call receivePayment.","paypal");
 				$this->api->receivePayment(
 					$bill_key,'accepted',$this->getPost('txn_id'));
+			}else{
+				Yii::log(__METHOD__.".OK.call receivePayment. uncomplete."
+					.$payment_status,"paypal");
+        		$this->api->receivePayment(
+        			$bill_key,
+					"paypal_status_".$payment_status,$this->getPost('txn_id'));
 			}
 		}else{
 			Yii::log(__METHOD__." IPN not validated. bill_key="
@@ -158,13 +164,9 @@ class PaypalCallbackAction extends CAction {
 		}
 		Yii::log(__METHOD__." response=".$res,"paypal");
 		if (strcmp ($res, "VERIFIED") == 0) {
-			// check whether the payment_status is Completed
-			$payment_status = $_POST['payment_status'];
-			if($payment_status == 'Completed'){
-				return true;
-			}else{
-				return false;
-			}
+			//take care about payment_status, must be 'Completed'
+			//this method responsability is to validate real request, no more.
+			return true;
 		}else{
 			return false;
 		}
