@@ -263,9 +263,7 @@ abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 		$this->_accountid = null;
 	}
 	protected function billaccount($who){
-		if($this->_accountid == null)
-			$this->_accountid = $this->getBillAccount($who, self::$account);
-		return $this->_accountid;
+		return $this->getBillAccount($who, self::$account);
 	}
 	protected function _set($who,$property, $value){
 		$this->sto()->set($this->billaccount($who), $property, $value);
