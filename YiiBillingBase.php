@@ -97,10 +97,10 @@ abstract class YiiBillingBase {
 		return false;
 	}
 	public function receivePayment($bill_key, $status, $txn_id){
-		Yii::log(__METHOD__." bill_key=".$bill_key." txn_id=".$txn_id,"info");
+		$this->log(__METHOD__." bill_key=".$bill_key." txn_id=".$txn_id,"info");
 		list($who, $accountname) = $this->getBillAccountInfo($bill_key);
 		if(true == $this->onPaymentReceived($bill_key,$status,$txn_id,true)){
-			Yii::log(__METHOD__." onPaymentReceived returns true. "
+			$this->log(__METHOD__." onPaymentReceived returns true. "
 				."payment will be processed.","paypal");
 			if($status == 'accepted'){
 				$this->setBillPaid($bill_key, $txn_id);
@@ -108,14 +108,14 @@ abstract class YiiBillingBase {
 					$who, $accountname,'up-to-date');
 				$this->setCurrentBillKey($who, $accountname, $bill_key);
 				$this->onPaymentReceived($bill_key, $status, $txn_id, false);
-				Yii::log(__METHOD__." payment accepted","info");
+				$this->log(__METHOD__." payment accepted","info");
 			}else{
 				$this->setBillAccountStatus(
 					$who, $accountname, 'need-payment');
 				$this->onPaymentReceived($bill_key, $status, $txn_id, false);
 			}
 		}else{
-			Yii::log(__METHOD__." onPaymentReceived returns false. "
+			$this->log(__METHOD__." onPaymentReceived returns false. "
 				."payment rejected.","info");
 		}
 	}
@@ -253,5 +253,8 @@ abstract class YiiBillingBase {
 	}
 	public function calculatePageOffset($items_per_page, $page){
 		return $items_per_page * $page;
+	}
+	protected function log($text,$level="info"){
+		
 	}
 }

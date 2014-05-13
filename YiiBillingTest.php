@@ -6,16 +6,26 @@
  * @author Christian Salazar <christiansalazarh@gmail.com> 
  * @license FREE BSD
  */
+require_once("../../../../wp-config.php");
+require_once('YiiBillingOmfStorage.php');
+require_once('../omf/OmfPdo.php');
 class YiiBillingTest extends YiiBillingOmfStorage {
 	private $eventcalled=null;
+	private $sto;
 	protected function sto() {
-		return Yii::app()->omf;
+		if(null==$this->sto){
+			$this->sto = new OmfPdo(); 
+		}
+		return $this->sto;
 	}
 	protected function BillAccountClassName(){
 		return "BillAccountTest";
 	}
-	private function log($what,$data){
-		printf("[%s][%s]",$what,$data);
+	protected function log($text,$info){
+		printf("[%s][%s]",$text,$info);
+	}
+	protected function logger($text,$extra){
+		$this->log("[".$text."][".$extra."]","info");
 	}
 	public function run(){
 		$this->clearAll();
@@ -36,7 +46,7 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		$this->sto()->deleteObjects($this->BillAccountClassName());
 	}
 	private function lowleveltest(){
-		$this->log(__METHOD__,"running...");
+		$this->logger(__METHOD__,"running...");
 
 		$who = "994";
 		$an = "test";
@@ -46,7 +56,7 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		if($who!==$this->sto()->get($id, 'who')) throw new Exception("error");
 		if($an!==$this->sto()->get($id, 'account_name')) throw new Exception("error");
 		if($id != $this->getBillAccount($who,$an)) throw new Exception("error");
-		$objects = $this->sto()->find($this->BillAccountClassName(),'who', $who);
+		$objects = $this->sto()->findByAttribute($this->BillAccountClassName(),'who', $who);
 		if(count($objects) !== 1) throw new Exception("error");
 
 		$tmp=$this->getBillAccountStatus($who, $an);
@@ -131,7 +141,7 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		printf("OK\n");
 	}
 	private function highleveltest(){
-		$this->log(__METHOD__,"running...");
+		$this->logger(__METHOD__,"running...");
 		$who = "1994";
 		$an = "test2";
 		$from = '2014/01/01';
@@ -198,7 +208,7 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		print("OK\n");
 	}
 	private function simplepayment() {
-		$this->log(__METHOD__,"running...");
+		$this->logger(__METHOD__,"running...");
 		$who = "1000";
         $an = "test";
         $from = '2014/01/01';
@@ -221,7 +231,7 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 	}
 	private function callbacktest() {
 		/*
-		$this->log(__METHOD__,"running...");
+		$this->logger(__METHOD__,"running...");
 		$who = "1000";
         $an = "test";
         $from = '2014/01/01';
@@ -238,7 +248,7 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 		*/
 	}
 	public function supervisionTester(){
-		$this->log(__METHOD__,"running...");
+		$this->logger(__METHOD__,"running...");
 
         $an = "test";
 		$accounts = array();
@@ -353,3 +363,9 @@ class YiiBillingTest extends YiiBillingOmfStorage {
 	public function isAccountNeedPayment($who,$dt=null){}
 	public function isAccountPlanRequired($who,$dt=null){}
 }
+printf("YiiBilling test in progress..\n");
+$inst = new YiiBillingTest();
+$inst->run();
+printf("\nend\n");
+
+

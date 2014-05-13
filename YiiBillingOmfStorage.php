@@ -43,6 +43,7 @@
  * @author Christian Salazar <christiansalazarh@gmail.com> 
  * @license FREE BSD
  */
+require_once('YiiBillingBase.php');
 abstract class YiiBillingOmfStorage extends YiiBillingBase {
 	abstract protected function sto();
 
@@ -102,8 +103,10 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 	 * @return string the bill account id
 	 */
 	protected function getBillAccount($who, $accountname){
-		foreach($this->sto()->find(
-			$this->BillAccountClassName(), 'who', $who) as $account){
+		$items = $this->sto()->findByAttribute(
+			$this->BillAccountClassName(), 'who', $who);
+		if($items)
+		foreach($items as $account){
 			list($account_id) = $account;
 			$_name = $this->sto()->get($account_id, 'account_name');
 			if($_name == $accountname)
@@ -149,12 +152,16 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 	public function listBillAccountsByStatus($status,$offset=0,$limit=-1,
 	  $counter_only=false){
 		if($counter_only == true){
-			return $this->sto()->find($this->BillAccountClassName(),
+			$items = $this->sto()->findByAttribute($this->BillAccountClassName(),
 				'account_status',$status,$offset,$limit,true);
+			if($items) return $items;
+			return array();
 		}else{
 		$objects = array();
-		foreach($this->sto()->find($this->BillAccountClassName(),
-			'account_status',$status,$offset,$limit,false) as $obj){
+		$_items = $this->sto()->findByAttribute($this->BillAccountClassName(),
+			'account_status',$status,$offset,$limit,false);
+		if($_items)
+		foreach($_items as $obj){
 			list($id) = $obj;
 			$objects[] = array(
 				$id,
@@ -183,6 +190,11 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 			$this->sto()->set($bill_id, $properties);
 		return $bill_key;
 	}
+	private function _getBillParent($bill_id){
+		foreach($this->sto()->getParents($bill_id,"parent") as $p)
+			return $p;
+		return null; // has no parents
+	}
 	/**
 	 * findBill
 	 *	returns bill information
@@ -197,10 +209,10 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 	 * @return array see note
 	 */
 	protected function findBill($bill_key){
-		if(null == ($bill_list = $this->sto()->find('Bill','key',$bill_key)))
+		if(null == ($bill_list = $this->sto()->findByAttribute('Bill','key',$bill_key)))
 			return null;
 		list($bill_id) = $bill_list[0];
-		list($billaccount_id) = $this->sto()->getParent($bill_id);
+		list($billaccount_id) = $this->_getBillParent($bill_id);
 		$who = $this->sto()->get($billaccount_id,'who');
 		return array(
 			$who,
@@ -222,10 +234,10 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 	 * @return array  (who, accountname)
 	 */
 	protected function getBillAccountInfo($bill_key){
-		if(null == ($list = $this->sto()->find('Bill','key',$bill_key)))
+		if(null == ($list = $this->sto()->findByAttribute('Bill','key',$bill_key)))
 			return null;
 		list($bill_id) = $list[0];
-		list($billaccount_id) = $this->sto()->getParent($bill_id);
+		list($billaccount_id) = $this->_getBillParent($bill_id);
 		return array($this->sto()->get($billaccount_id,'who'),
 		$this->sto()->get($billaccount_id,'account_name'));
 	}
