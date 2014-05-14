@@ -155,23 +155,23 @@ abstract class YiiBillingOmfStorage extends YiiBillingBase {
 			$items = $this->sto()->findByAttribute($this->BillAccountClassName(),
 				'account_status',$status,$offset,$limit,true);
 			if($items) return $items;
-			return array();
+			return 0;
 		}else{
-		$objects = array();
-		$_items = $this->sto()->findByAttribute($this->BillAccountClassName(),
-			'account_status',$status,$offset,$limit,false);
-		if($_items)
-		foreach($_items as $obj){
-			list($id) = $obj;
-			$objects[] = array(
-				$id,
-				$this->sto()->get($id,'who'),
-				$this->sto()->get($id,'account_name'),
-				$this->sto()->get($id,'account_status'),
-				$this->sto()->get($id,'current_bill'),
-			);
-		}
-		return $objects;
+			$objects = array();
+			$_items = $this->sto()->findByAttribute($this->BillAccountClassName(),
+				'account_status',$status,$offset,$limit,false);
+			if(null !== $_items)
+				foreach($_items as $obj){
+					list($id) = $obj;
+					$objects[] = array(
+						$id,
+						$this->sto()->get($id,'who'),
+						$this->sto()->get($id,'account_name'),
+						$this->sto()->get($id,'account_status'),
+						$this->sto()->get($id,'current_bill'),
+					);
+				}
+			return $objects;
 		}
 	}
 	protected function createNewBillKey(

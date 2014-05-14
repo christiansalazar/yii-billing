@@ -62,6 +62,7 @@
  * @author Christian Salazar <christiansalazarh@gmail.com>
  * @license FREE BSD
  */
+require_once('YiiBillingOmfStorage.php');
 abstract class YiiBillingPaymentsInAdvance extends YiiBillingOmfStorage {
 	private $_accountid = null;
 	public static $account="account1";

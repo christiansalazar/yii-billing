@@ -1,7 +1,20 @@
 <?php
+require_once("../../../../wp-config.php");
+require_once('../omf/OmfPdo.php');
+require_once('YiiBillingPaymentsInAdvance.php');
 class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
+	private $sto;
 	protected function sto() {
-		return Yii::app()->omf;
+		if(null==$this->sto){
+			$this->sto = new OmfPdo(); 
+		}
+		return $this->sto;
+	}
+	protected function log($text,$info){
+		printf("[%s][%s]",$text,$info);
+	}
+	protected function logger($text,$extra){
+		$this->log("[".$text."][".$extra."]","info");
 	}
 	protected function BillAccountClassName(){
 		return "BillAccountTest";
@@ -107,8 +120,11 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 		if(4 != count($billkeys)) throw new Exception("error");
 		$tt['createBillQuotes'] = microtime(true);
 
+		printf("\nBillKeys:\n");
 		foreach($this->listBillQuotes($who) as $k=>$quote){
 			list($id,$key,$item,$amount,$from,$to,$txn_id) = $quote;
+			printf("#%02d key:%s item: %s, amount: %s, from: %s, to: %s, txn_id: %s\n"
+				,$k,$key,$item,$amount,$from,$to,$txn_id);
 			if($k==0){
 				if($item != 'quote-1') throw new Exception("error");
 				if($amount != 130) throw new Exception("error.".$amount);
@@ -195,14 +211,14 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 		list($id2,$key2,$item2,$amount2,$from2,$to2) = $quotes[1];
 		list($id3,$key3,$item3,$amount3,$from3,$to3) = $quotes[2];
 		list($id4,$key4,$item4,$amount4,$from4,$to4) = $quotes[3];
-		/*
+		
 		printf("\n");
 		printf("1 [%s,%s,%s,%s,%s,%s]\n",$id1,$key1,$item1,$amount1,$from1,$to1);
 		printf("2 [%s,%s,%s,%s,%s,%s]\n",$id2,$key2,$item2,$amount2,$from1,$to2);
 		printf("3 [%s,%s,%s,%s,%s,%s]\n",$id3,$key3,$item3,$amount3,$from1,$to3);
 		printf("4 [%s,%s,%s,%s,%s,%s]\n",$id4,$key4,$item4,$amount4,$from1,$to4);
 		printf("\n");
-		*/
+		
 		if($key1 != $this->getCurrentBillKey($who,parent::$account))
 			throw new Exception("error");
 		$tt['step2b'] = microtime(true);
@@ -222,14 +238,15 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 			throw new Exception("error");
 
 		$tt['step3'] = microtime(true);
-		$dt = strtotime($dt." +1 days");
-		if(1 != $this->checkAccountStatus($who,$dt))
+		$test = strtotime($dt." +1 days");
+		if(1 != $this->checkAccountStatus($who,$test))
 			throw new Exception("error");
 		if("up-to-date" != $this->billAccountStatus($who))
 			throw new Exception("error");
-		$dt = strtotime($dt." +30 days");
-		if(1 != $this->checkAccountStatus($who,$dt))
-			throw new Exception("error");
+		$test = strtotime($dt." +30 days");
+		$retval = $this->checkAccountStatus($who,$test);
+		if(1 != $retval)
+			throw new Exception("error. retval is: ".$retval.", must be 1. dt is: ".date("Y-m-d",$test));
 		if("up-to-date" != $this->billAccountStatus($who))
 			throw new Exception("error");
 
@@ -387,7 +404,8 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 			throw new Exception("error");
 
 		$tt['step13'] = microtime(true);
-		if(0 !== $this->listBillAccountsByStatus(null,0,-1,true)) throw new Exception("error");
+		$retval = $this->listBillAccountsByStatus(null,0,-1,true);
+		if(0 !== $this->listBillAccountsByStatus(null,0,-1,true)) throw new Exception("error.rv=".$retval);
 		if(null === $this->listBillAccountsByStatus(null,0,-1,false)) throw new Exception("error");
 		if(0 !== $this->listBillAccountsByStatus("null",0,-1,true)) throw new Exception("error");
 		if(null === $this->listBillAccountsByStatus("null",0,-1,false)) throw new Exception("error");
@@ -521,3 +539,7 @@ class YiiBillingPaymentsInAdvanceTest extends YiiBillingPaymentsInAdvance {
 		
 	}
 }
+printf("YiiBillingPaymentsInAdvance test in progress..\n");
+$inst = new YiiBillingPaymentsInAdvanceTest();
+$inst->run();
+printf("\nend\n");
